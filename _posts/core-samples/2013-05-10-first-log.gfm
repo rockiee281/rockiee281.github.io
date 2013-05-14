@@ -8,26 +8,7 @@ tags : [android, fragment]
 
 
 据说code是这么写的：
-<code>
-package com.rockiee281;
 
-
-public class Test {
-
-	public static void main(String[] args) {
-//		String regex = "\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
-//		System.out.println(Pattern.matches(regex, "11@1xx21.2xx33.com"));
-		int head = 20;
-		int y0 = 30;
-		int y1 = 1000;
-		int distance = (y1 - y0 - head);
-		double distanceD = Math.pow(distance,0.9);
-		System.out.println(distance);
-		System.out.println(distanceD);
-		
-	}
-}
-</code>
 
 不过貌似自带的code语法支持不够啊，没有语法高亮，样式也不够好看，准备晚上回家试试google家的GOOGLE-CODE-PRETTIFY，这里有篇[介绍文章](http://wayjam.me/google-code-prettify.html)
 
