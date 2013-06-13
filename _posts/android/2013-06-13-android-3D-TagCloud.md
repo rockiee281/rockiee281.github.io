@@ -117,6 +117,7 @@ tags : [android]
 	}
 ```
 
+但是在测试中还发现了一个问题，有时候手指在屏幕上滑动，但是view的ontouchevent事件并未响应。看来得明天去公司请教大牛了。
 
 
 [1]: http://www.eyeandroid.com/thread-1313-1-1.html
