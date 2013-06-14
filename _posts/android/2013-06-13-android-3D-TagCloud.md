@@ -119,6 +119,29 @@ tags : [android]
 
 但是在测试中还发现了一个问题，有时候手指在屏幕上滑动，但是view的ontouchevent事件并未响应。看来得明天去公司请教大牛了。
 
+看了一些关于android的ontouch响应的资料，ontouch只是处理事件，在此之前如果dispatch方法未拦截到事件或者之前的view已经处理了事件的话，会导致ontouch方法根本就不会被调用。因此，我改写了layout默认的dispatch方法，代码如下:
+
+```
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent e) {
+		float x = e.getX();
+		float y = e.getY();
+		boolean result = true;
+		if (e.getAction() == MotionEvent.ACTION_MOVE) {
+			return false;
+		} else {
+			oldX = x;
+			oldY = y;
+			result = super.dispatchTouchEvent(e);
+		}
+		
+		Log.d(TAG, "action is :" + e.getAction());
+		Log.d(TAG, "result is :" + result);
+		return result;
+	}
+
+```
+
 
 [1]: http://www.eyeandroid.com/thread-1313-1-1.html
 [2]: https://sites.google.com/site/tagindemo/TagCloud
