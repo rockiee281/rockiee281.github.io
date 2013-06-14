@@ -9,7 +9,7 @@ tags : [android]
 
 下午大概的看了一下cloudtag imp4的代码，很简洁，核心的功能实现在一个TagCloudView中。其中，响应用户操作的代码，放在了view的`public boolean onTouchEvent(MotionEvent e)`方法中。原来作者的代码如下：
 
-``` java
+```
 	public boolean onTouchEvent(MotionEvent e) {
 		float x = e.getX();
 		float y = e.getY();
@@ -60,7 +60,7 @@ tags : [android]
 我做了一些小的修改，让不再是依靠长按屏幕某个位置来触发球体滚动，因为我觉得在手机上通过滑动来控制屏幕的变化更加自然，就改成了下面这个样子：
 
 
-``` java
+```
 @Override
 	public boolean onTouchEvent(MotionEvent e) {
 		float x = e.getX();
