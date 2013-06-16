@@ -1,454 +1,148 @@
-# Quick Start
+---
+layout: post
+category : android
+tagline: "android cloud tag"
+tags : [android]
+---
+今天在讨论中大家想在我们的搜索页将搜索热词用wordpress中常见的tag云的形式来展示，功能不足噱头补嘛 XD  
+然后就在google上搜索了一番。在中文的开发论坛里找到了一个[demo][1]，类似星空图的样子，效果不错。不过惊喜在后台，google上又找到了一个开源的项目[tagin!][2]，它实现了一个真正的浑天仪tag云，而且效果很华丽哟。代码地址在[这里][3]，感兴趣的可以下载体验一下。不过现在它是通过在屏幕边缘长按来控制tag球转动，我想把代码修改一下，让他可以在滑动的时候也能很方便的让tag云跟随转动。如果修改成功，稍后奉上代码。
 
-## Mapping JSON to objects and vice versa
+下午大概的看了一下cloudtag imp4的代码，很简洁，核心的功能实现在一个TagCloudView中。其中，响应用户操作的代码，放在了view的`public boolean onTouchEvent(MotionEvent e)`方法中。原来作者的代码如下：
 
-In order to consume data in JSON format inside .Net programs, the natural
-approach that comes to mind is to use JSON text to populate a new instance
-of a particular class; either a custom one, built to match the structure of
-the input JSON text, or a more general one which acts as a dictionary.
+``` java
+	public boolean onTouchEvent(MotionEvent e) {
+		float x = e.getX();
+		float y = e.getY();
+//		Log.d(TAG, "motion:x=["+x+"] y=["+y+"] action is ["+e.getAction()+"]");
+		switch (e.getAction()) {
+		case MotionEvent.ACTION_MOVE:	
+			//rotate elements depending on how far the selection point is from center of cloud
+			float dx = x - centerX;
+			float dy = y - centerY;
+			
+			Log.d(TAG, "motion:dx=["+dx+"] dy=["+dy+"] action is ["+e.getAction()+"]");
+			
+			mAngleX = ( dy/radius) *tspeed * TOUCH_SCALE_FACTOR;
+			mAngleY = (-dx/radius) *tspeed * TOUCH_SCALE_FACTOR;
+	    	
+			mTagCloud.setAngleX(mAngleX);
+	    	mTagCloud.setAngleY(mAngleY);
+	    	mTagCloud.update();
+	    	
+	    	Iterator it=mTagCloud.iterator();
+	    	Tag tempTag;
+	    	while (it.hasNext()){
+	    		tempTag= (Tag) it.next();              
+	    		mParams.get(tempTag.getParamNo()).setMargins(	
+						(int) (centerX -shiftLeft + tempTag.getLoc2DX()), 
+						(int) (centerY + tempTag.getLoc2DY()), 
+						0, 
+						0);
+				mTextView.get(tempTag.getParamNo()).setTextSize((int)(tempTag.getTextSize() * tempTag.getScale()));
+				int mergedColor = Color.argb( (int)	(tempTag.getAlpha() * 255), 
+						  (int)	(tempTag.getColorR() * 255), 
+						  (int)	(tempTag.getColorG() * 255), 
+						  (int) (tempTag.getColorB() * 255));
+				mTextView.get(tempTag.getParamNo()).setTextColor(mergedColor);
+				mTextView.get(tempTag.getParamNo()).bringToFront();
+	    	}
+			
+			break;
+		/*case MotionEvent.ACTION_UP:  //now it is clicked!!!!		
+			dx = x - centerX;
+			dy = y - centerY;			
+			break;*/
+		}
+		
+		return true;
+	}
+```
+我做了一些小的修改，让不再是依靠长按屏幕某个位置来触发球体滚动，因为我觉得在手机上通过滑动来控制屏幕的变化更加自然，就改成了下面这个样子：
 
-Conversely, in order to build new JSON strings from data stored in objects,
-a simple _export_--like operation sounds like a good idea.
 
-For this purpose, *LitJSON* includes the `JsonMapper` class,
-which provides two main methods used to do JSON--to--object and
-object--to--JSON conversions.  These methods are
-`JsonMapper.ToObject` and `JsonMapper.ToJson`.
-
-### Simple `JsonMapper` examples
-
-As the following example demonstrates, the `ToObject` method has a generic
-variant, `JsonMapper.ToObject<T>`, that is used to specify the type of the
-object to be returned.
-
-```cs
-using LitJson;
-using System;
-
-public class Person
-{
-    // C# 3.0 auto-implemented properties
-    public string   Name     { get; set; }
-    public int      Age      { get; set; }
-    public DateTime Birthday { get; set; }
-}
-
-public class JsonSample
-{
-    public static void Main()
-    {
-        PersonToJson();
-        JsonToPerson();
-    }
-
-    public static void PersonToJson()
-    {
-        Person bill = new Person();
-
-        bill.Name = "William Shakespeare";
-        bill.Age  = 51;
-        bill.Birthday = new DateTime(1564, 4, 26);
-
-        string json_bill = JsonMapper.ToJson(bill);
-
-        Console.WriteLine(json_bill);
-    }
-
-    public static void JsonToPerson()
-    {
-        string json = @"
-            {
-                ""Name""     : ""Thomas More"",
-                ""Age""      : 57,
-                ""Birthday"" : ""02/07/1478 00:00:00""
-            }";
-
-        Person thomas = JsonMapper.ToObject<Person>(json);
-
-        Console.WriteLine("Thomas' age: {0}", thomas.Age);
-    }
-}
+``` java
+@Override
+	public boolean onTouchEvent(MotionEvent e) {
+		float x = e.getX();
+		float y = e.getY();
+//		Log.d(TAG, "motion:x=["+x+"] y=["+y+"] action is ["+e.getAction()+"]");
+		switch (e.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			oldX = x;
+			oldY = y;
+			Log.d(TAG, "motion:x=["+x+"] y=["+y+"] action is ["+e.getAction()+"]");
+			break;
+		case MotionEvent.ACTION_MOVE:	
+			//rotate elements depending on how far the selection point is from center of cloud
+			float dx = x - oldX;
+			float dy = y - oldY;
+			oldX = x;
+			oldY = y;
+			
+			Log.d(TAG, "motion:dx=["+dx+"] dy=["+dy+"] action is ["+e.getAction()+"]");
+			
+			mAngleX = ( dy/radius) *tspeed * TOUCH_SCALE_FACTOR;
+			mAngleY = (-dx/radius) *tspeed * TOUCH_SCALE_FACTOR;
+	    	
+			mTagCloud.setAngleX(mAngleX);
+	    	mTagCloud.setAngleY(mAngleY);
+	    	mTagCloud.update();
+	    	
+	    	Iterator it=mTagCloud.iterator();
+	    	Tag tempTag;
+	    	while (it.hasNext()){
+	    		tempTag= (Tag) it.next();              
+	    		mParams.get(tempTag.getParamNo()).setMargins(	
+						(int) (centerX -shiftLeft + tempTag.getLoc2DX()), 
+						(int) (centerY + tempTag.getLoc2DY()), 
+						0, 
+						0);
+				mTextView.get(tempTag.getParamNo()).setTextSize((int)(tempTag.getTextSize() * tempTag.getScale()));
+				int mergedColor = Color.argb( (int)	(tempTag.getAlpha() * 255), 
+						  (int)	(tempTag.getColorR() * 255), 
+						  (int)	(tempTag.getColorG() * 255), 
+						  (int) (tempTag.getColorB() * 255));
+				mTextView.get(tempTag.getParamNo()).setTextColor(mergedColor);
+				mTextView.get(tempTag.getParamNo()).bringToFront();
+	    	}
+			
+			break;
+		/*case MotionEvent.ACTION_UP:  //now it is clicked!!!!		
+			dx = x - centerX;
+			dy = y - centerY;			
+			break;*/
+		}
+		
+		return true;
+	}
 ```
 
-Output from the example:
+但是在测试中还发现了一个问题，有时候手指在屏幕上滑动，但是view的ontouchevent事件并未响应。看来得明天去公司请教大牛了。
 
-```console
-{"Name":"William Shakespeare","Age":51,"Birthday":"04/26/1564 00:00:00"}
-Thomas' age: 57
+看了一些关于android的ontouch响应的资料，ontouch只是处理事件，在此之前如果dispatch方法未拦截到事件或者之前的view已经处理了事件的话，会导致ontouch方法根本就不会被调用。因此，我改写了layout默认的dispatch方法，代码如下:
+
+```
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent e) {
+		float x = e.getX();
+		float y = e.getY();
+		boolean result = true;
+		if (e.getAction() == MotionEvent.ACTION_MOVE) {
+			return false;
+		} else {
+			oldX = x;
+			oldY = y;
+			result = super.dispatchTouchEvent(e);
+		}
+		
+		Log.d(TAG, "action is :" + e.getAction());
+		Log.d(TAG, "result is :" + result);
+		return result;
+	}
+
 ```
 
-### Using the non--generic variant of `JsonMapper.ToObject`
 
-When JSON data is to be read and a custom class that matches a particular
-data structure is not available or desired, users can use the non--generic
-variant of `ToObject`, which returns a `JsonData` instance. `JsonData` is a
-general purpose type that can hold any of the data types supported by JSON,
-including lists and dictionaries.
-
-```cs
-using LitJson;
-using System;
-
-public class JsonSample
-{
-    public static void Main()
-    {
-        string json = @"
-          {
-            ""album"" : {
-              ""name""   : ""The Dark Side of the Moon"",
-              ""artist"" : ""Pink Floyd"",
-              ""year""   : 1973,
-              ""tracks"" : [
-                ""Speak To Me"",
-                ""Breathe"",
-                ""On The Run""
-              ]
-            }
-          }
-        ";
-
-        LoadAlbumData(json);
-    }
-
-    public static void LoadAlbumData(string json_text)
-    {
-        Console.WriteLine("Reading data from the following JSON string: {0}",
-                          json_text);
-
-        JsonData data = JsonMapper.ToObject(json_text);
-
-        // Dictionaries are accessed like a hash-table
-        Console.WriteLine("Album's name: {0}", data["album"]["name"]);
-
-        // Scalar elements stored in a JsonData instance can be cast to
-        // their natural types
-        string artist = (string) data["album"]["artist"];
-        int    year   = (int) data["album"]["year"];
-
-        Console.WriteLine("Recorded by {0} in {1}", artist, year);
-
-        // Arrays are accessed like regular lists as well
-        Console.WriteLine("First track: {0}", data["album"]["tracks"][0]);
-    }
-}
-```
-
-Output from the example:
-
-```console
-Reading data from the following JSON string:
-          {
-            "album" : {
-              "name"   : "The Dark Side of the Moon",
-              "artist" : "Pink Floyd",
-              "year"   : 1973,
-              "tracks" : [
-                "Speak To Me",
-                "Breathe",
-                "On The Run"
-              ]
-            }
-          }
-
-Album's name: The Dark Side of the Moon
-Recorded by Pink Floyd in 1973
-First track: Speak To Me
-```
-
-## Readers and Writers
-
-An alternative interface to handling JSON data that might be familiar to
-some developers is through classes that make it possible to read and write
-data in a stream--like fashion. These classes are `JsonReader` and
-`JsonWriter`.
-
-These two types are in fact the foundation of this library, and the
-`JsonMapper` type is built on top of them, so in a way, the developer can
-think of the reader and writer classes as the low--level programming
-interface for LitJSON.
-
-### Using `JsonReader`
-
-```cs
-using LitJson;
-using System;
-
-public class DataReader
-{
-    public static void Main()
-    {
-        string sample = @"{
-            ""name""  : ""Bill"",
-            ""age""   : 32,
-            ""awake"" : true,
-            ""n""     : 1994.0226,
-            ""note""  : [ ""life"", ""is"", ""but"", ""a"", ""dream"" ]
-          }";
-
-        PrintJson(sample);
-    }
-
-    public static void PrintJson(string json)
-    {
-        JsonReader reader = new JsonReader(json);
-
-        Console.WriteLine ("{0,14} {1,10} {2,16}", "Token", "Value", "Type");
-        Console.WriteLine (new String ('-', 42));
-
-        // The Read() method returns false when there's nothing else to read
-        while (reader.Read()) {
-            string type = reader.Value != null ?
-                reader.Value.GetType().ToString() : "";
-
-            Console.WriteLine("{0,14} {1,10} {2,16}",
-                              reader.Token, reader.Value, type);
-        }
-    }
-}
-```
-
-This example would produce the following output:
-
-```console
-         Token      Value             Type
-------------------------------------------
-   ObjectStart                            
-  PropertyName       name    System.String
-        String       Bill    System.String
-  PropertyName        age    System.String
-           Int         32     System.Int32
-  PropertyName      awake    System.String
-       Boolean       True   System.Boolean
-  PropertyName          n    System.String
-        Double  1994.0226    System.Double
-  PropertyName       note    System.String
-    ArrayStart                            
-        String       life    System.String
-        String         is    System.String
-        String        but    System.String
-        String          a    System.String
-        String      dream    System.String
-      ArrayEnd                            
-     ObjectEnd                            
-```
-
-### Using `JsonWriter`
-
-The `JsonWriter` class is quite simple. Keep in mind that if you want to
-convert some arbitrary object into a JSON string, you'd normally just use
-`JsonMapper.ToJson`.
-
-```cs
-using LitJson;
-using System;
-using System.Text;
-
-public class DataWriter
-{
-    public static void Main()
-    {
-        StringBuilder sb = new StringBuilder();
-        JsonWriter writer = new JsonWriter(sb);
-
-        writer.WriteArrayStart();
-        writer.Write(1);
-        writer.Write(2);
-        writer.Write(3);
-
-        writer.WriteObjectStart();
-        writer.WritePropertyName("color");
-        writer.Write("blue");
-        writer.WriteObjectEnd();
-
-        writer.WriteArrayEnd();
-
-        Console.WriteLine(sb.ToString());
-    }
-}
-```
-
-Output from the example:
-
-```console
-[1,2,3,{"color":"blue"}]
-```
-
-## Configuring the library's behaviour
-
-JSON is a very concise data--interchange format; nothing more, nothing less.
-For this reason, handling data in JSON format inside a program may require a
-deliberate decision on your part regarding some little detail that goes
-beyond the scope of JSON's specs.
-
-Consider, for example, reading data from JSON strings where
-single--quotes are used to delimit strings, or Javascript--style
-comments are included as a form of documentation. Those things are not part
-of the JSON standard, but they are commonly used by some developers, so you
-may want to be forgiving or strict depending on the situation. Or what about
-if you want to convert a *.Net* object into a JSON string, but
-pretty--printed (using indentation)?
-
-To declare the behaviour you want, you may change a few properties from your
-`JsonReader` and `JsonWriter` objects.
-
-### Configuration of `JsonReader`
-
-```cs
-using LitJson;
-using System;
-
-public class JsonReaderConfigExample
-{
-    public static void Main()
-    {
-        string json;
-
-        json = " /* these are some numbers */ [ 2, 3, 5, 7, 11 ] ";
-        TestReadingArray(json);
-
-        json = " [ \"hello\", 'world' ] ";
-        TestReadingArray(json);
-    }
-
-    static void TestReadingArray(string json_array)
-    {
-        JsonReader defaultReader, customReader;
-
-        defaultReader = new JsonReader(json_array);
-        customReader  = new JsonReader(json_array);
-
-        customReader.AllowComments            = false;
-        customReader.AllowSingleQuotedStrings = false;
-
-        ReadArray(defaultReader);
-        ReadArray(customReader);
-    }
-
-    static void ReadArray(JsonReader reader)
-    {
-        Console.WriteLine("Reading an array");
-
-        try {
-            JsonData data = JsonMapper.ToObject(reader);
-
-            foreach (JsonData elem in data)
-                Console.Write("  {0}", elem);
-
-            Console.WriteLine("  [end]");
-        }
-        catch (Exception e) {
-            Console.WriteLine("  Exception caught: {0}", e.Message);
-        }
-    }
-}
-```
-
-The output would be:
-
-```console
-Reading an array
-  2  3  5  7  11  [end]
-Reading an array
-  Exception caught: Invalid character '/' in input string
-Reading an array
-  hello  world  [end]
-Reading an array
-  Exception caught: Invalid character ''' in input string
-```
-
-### Configuration of `JsonWriter`
-
-```cs
-using LitJson;
-using System;
-
-public enum AnimalType
-{
-    Dog,
-    Cat,
-    Parrot
-}
-
-public class Animal
-{
-    public string     Name { get; set; }
-    public AnimalType Type { get; set; }
-    public int        Age  { get; set; }
-    public string[]   Toys { get; set; }
-}
-
-public class JsonWriterConfigExample
-{
-    public static void Main()
-    {
-        var dog = new Animal {
-            Name = "Noam Chompsky",
-            Type = AnimalType.Dog,
-            Age  = 3,
-            Toys = new string[] { "rubber bone", "tennis ball" }
-        };
-
-        var cat = new Animal {
-            Name = "Colonel Meow",
-            Type = AnimalType.Cat,
-            Age  = 5,
-            Toys = new string[] { "cardboard box" }
-        };
-
-        TestWritingAnimal(dog);
-        TestWritingAnimal(cat, 2);
-    }
-
-    static void TestWritingAnimal(Animal pet, int indentLevel = 0)
-    {
-        Console.WriteLine("\nConverting {0}'s data into JSON..", pet.Name);
-        JsonWriter writer1 = new JsonWriter(Console.Out);
-        JsonWriter writer2 = new JsonWriter(Console.Out);
-
-        writer2.PrettyPrint = true;
-        if (indentLevel != 0)
-            writer2.IndentValue = indentLevel;
-
-        Console.WriteLine("Default JSON string:");
-        JsonMapper.ToJson(pet, writer1);
-
-        Console.Write("\nPretty-printed:");
-        JsonMapper.ToJson(pet, writer2);
-        Console.WriteLine("");
-    }
-}
-```
-
-The output from this example is:
-
-```console
-
-Converting Noam Chompsky's data into JSON..
-Default JSON string:
-{"Name":"Noam Chompsky","Type":0,"Age":3,"Toys":["rubber bone","tennis ball"]}
-Pretty-printed:
-{
-    "Name" : "Noam Chompsky",
-    "Type" : 0,
-    "Age"  : 3,
-    "Toys" : [
-        "rubber bone",
-        "tennis ball"
-    ]
-}
-
-Converting Colonel Meow's data into JSON..
-Default JSON string:
-{"Name":"Colonel Meow","Type":1,"Age":5,"Toys":["cardboard box"]}
-Pretty-printed:
-{
-  "Name" : "Colonel Meow",
-  "Type" : 1,
-  "Age"  : 5,
-  "Toys" : [
-    "cardboard box"
-  ]
-}
-```
-
+[1]: http://www.eyeandroid.com/thread-1313-1-1.html
+[2]: https://sites.google.com/site/tagindemo/TagCloud
+[3]: https://code.launchpad.net/~saranasr83/tagin/TagCloud
