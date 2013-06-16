@@ -117,7 +117,7 @@ tags : [android]
 	}
 ```
 
-但是在测试中还发现了一个问题，有时候手指在屏幕上滑动，但是view的ontouchevent事件并未响应。看来得明天去公司请教大牛了。
+但是在测试中还发现了一个问题，有时候手指在屏幕上滑动，但是view的ontouchevent事件并未响应。看来得明天去公司请教大牛了。    
 
 看了一些关于android的ontouch响应的资料，ontouch只是处理事件，在此之前如果dispatch方法未拦截到事件或者之前的view已经处理了事件的话，会导致ontouch方法根本就不会被调用。因此，我改写了layout默认的dispatch方法，代码如下:
 
@@ -142,6 +142,7 @@ tags : [android]
 
 ```
 
+补充一下，如果将`onTouchEvent`替换为`dispatchTouchEvent`方法来处理的话，貌似就没有卡顿和不响应的情况了。但是这时候如果不在`dispatchTouchEvent`的末尾加上`return super.dispatchTouchEvent(e);`而直接返回`return true;`的话，tag云上的标签，也就是textview就会变得不可点击。看来textview的`View.OnClickListener`和这个`dispatchTouchEvent`事件还是有关联的？
 
 [1]: http://www.eyeandroid.com/thread-1313-1-1.html
 [2]: https://sites.google.com/site/tagindemo/TagCloud
