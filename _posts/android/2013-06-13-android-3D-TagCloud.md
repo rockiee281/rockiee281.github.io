@@ -9,7 +9,7 @@ tags : [android]
 
 下午大概的看了一下cloudtag imp4的代码，很简洁，核心的功能实现在一个TagCloudView中。其中，响应用户操作的代码，放在了view的`public boolean onTouchEvent(MotionEvent e)`方法中。原来作者的代码如下：
 
-``` java
+<pre>
 	public boolean onTouchEvent(MotionEvent e) {
 		float x = e.getX();
 		float y = e.getY();
@@ -46,7 +46,6 @@ tags : [android]
 				mTextView.get(tempTag.getParamNo()).setTextColor(mergedColor);
 				mTextView.get(tempTag.getParamNo()).bringToFront();
 	    	}
-			
 			break;
 		/*case MotionEvent.ACTION_UP:  //now it is clicked!!!!		
 			dx = x - centerX;
@@ -56,11 +55,11 @@ tags : [android]
 		
 		return true;
 	}
-```
+</pre>
+
 我做了一些小的修改，让不再是依靠长按屏幕某个位置来触发球体滚动，因为我觉得在手机上通过滑动来控制屏幕的变化更加自然，就改成了下面这个样子：
 
-
-``` java
+<pre>
 @Override
 	public boolean onTouchEvent(MotionEvent e) {
 		float x = e.getX();
@@ -115,13 +114,12 @@ tags : [android]
 		
 		return true;
 	}
-```
-
+</pre>
 但是在测试中还发现了一个问题，有时候手指在屏幕上滑动，但是view的ontouchevent事件并未响应。看来得明天去公司请教大牛了。
 
 看了一些关于android的ontouch响应的资料，ontouch只是处理事件，在此之前如果dispatch方法未拦截到事件或者之前的view已经处理了事件的话，会导致ontouch方法根本就不会被调用。因此，我改写了layout默认的dispatch方法，代码如下:
 
-```
+<pre>
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent e) {
 		float x = e.getX();
@@ -139,8 +137,7 @@ tags : [android]
 		Log.d(TAG, "result is :" + result);
 		return result;
 	}
-
-```
+</pre>
 
 
 [1]: http://www.eyeandroid.com/thread-1313-1-1.html
