@@ -1,7 +1,6 @@
 ---
 layout: post
 category : android
-tagline: "android system app upgrade failed"
 tags : [android]
 ---
 这两天鼓捣我们APP的在线升级，遇到一个让人抓狂的问题，折磨了两天终于搞定了。首先，我们的app是作为system app，随ROM一起发布，安装在/system/app目录下，这个是导致bug出现的根本原因。 
