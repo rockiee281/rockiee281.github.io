@@ -12,7 +12,7 @@ tags : [android,contacts match]
 
 大概的需求就是这样，一开始从网上找了下资料，然后发现了[LCS算法](http://en.wikipedia.org/wiki/Longest_common_subsequence_problem)，不过发现和我想要的并不是十分一致，不过还是给了点启发。然后就自己动手写了下面这个小东西，粗略的估算下，算法的时间复杂度应该是o(n^2)，肯定是应该有更优秀的解决办法的。
 
-```java
+<pre>
 public class MyLCS {
 	private String base;
 
@@ -45,7 +45,7 @@ public class MyLCS {
 	public void printMatch() {
 
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < baseWords.length; i++) {
+		for (int i = 0; i &lt; baseWords.length; i++) {
 			if (matchPositions[i] > 0) {
 				sb.append("<m>" + baseWords[i] + "</m> ");
 			} else {
@@ -111,7 +111,7 @@ public class MyLCS {
 		m.printMatch();
 	}
 }
-```
+</pre>
 
 
 
