@@ -64,7 +64,7 @@ public class MyLCS {
 		boolean firstCharInBlock = true; // 标记是否是拼音首字母
 		boolean lastMatchFirstInBlock = false; // 上次匹配到的是否是声母部分
 		boolean lastMatchInBlock = false; // 上次匹配到的是否在本个单词中
-		for (int j = startBIndex; j < baseChar.length; j++) {
+		for (int j = startBIndex; j &lt; baseChar.length; j++) {
 			char b = baseChar[j];
 			if (b == ' ') {
 				firstCharInBlock = true;
