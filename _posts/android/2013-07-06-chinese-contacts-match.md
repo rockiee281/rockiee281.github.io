@@ -11,4 +11,4 @@ tags : [android,contacts match]
 * 但是，如果输入“zhgf”或者“zhsn”这种，虽然也是全拼名称的顺序字串，但是因为zh后面紧跟的不是“s”这个声母，那表面用户试图输入的应该是“张国锋”或者“张三娘”之类的名字，这个时候不应该匹配到“张三丰”    
 
 大概的需求就是这样，一开始从网上找了下资料，然后发现了[LCS算法](http://en.wikipedia.org/wiki/Longest_common_subsequence_problem)，不过发现和我想要的并不是十分一致，不过还是给了点启发。然后就自己动手写了下面这个小东西，粗略的估算下，算法的时间复杂度应该是o(n^2)，肯定是应该有更优秀的解决办法的。
-
+代码地址：https://github.com/rockiee281/JavaUtils/blob/master/src/com/liyun/contacts/MyContactsMatch.java
