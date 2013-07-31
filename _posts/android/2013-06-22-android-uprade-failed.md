@@ -29,3 +29,12 @@ mContext.startActivity(intent);
 感觉android里头的坑还是好多啊……所以对这种严重依赖于系统的api的东西一直以来都比较恐惧，因为行为无法预知。找了本framework的书，要研究下app如何加载了。
 
 BTW：之前升级也遇到过一个更白痴的问题，更新安装成功，然后重启之后版本就退回了原来的旧版本，百思不得其解。最后发现是……………………我们升级的时候只改了version name,没有更改version code。
+
+2013-7-31 update:
+本来以为事情到这就告一段落了，结果在后续的测试中发现还是有问题。虽然升级之后UI更新了，新功能也有了，但是其实还是会报错的。如果新旧版本中有删掉的activity或者改名了的，还是会报错。就是说，系统还是会去找原来的apk包。    
+后来在开发同学们仔细检查了应用的代码之后发现，android的manifest文件中有一行配置`android:persistent="true"`,去掉这一行之后再升级就不会有问题了。后来发现有一段对这个配置的解释:
+<pre>
+Whether or not the application should remain running at all times . The default value is "false". Applications should not normally set this flag; persistence mode is intended only for certain system applications(phone,system).
+</pre>    
+这样一来，之前kill不掉应用就可以解释了。
+
