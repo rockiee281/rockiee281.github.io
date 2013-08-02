@@ -8,18 +8,14 @@ tags : [linux,shell]
 to explain the wild card issue, the solution is \*
 
 The reason why, and why its a spontaneous error. lets just say I run:
----------------------
-# find / -name fcgi*
----------------------
+# find / -name fcgi*`
 
-That works fine in _most_ directories... however, if I'm in the FCGI directory:
----------------------
+That works fine in _most_ directories... however, if I am in the FCGI directory:
 # ls
 fcgi.c fcgi.h fcgi.o
 
 # find / -name fcgi*
 find: paths mus precede expression
---------------------
 
 its because the shell in this instance replaces
 find / -name fcgi*
