@@ -58,6 +58,9 @@ at值分别为3、6、9，也就是每次提取出比较的TopN的值，precisio
 这里可以看出在mahout的设计者眼中，timestamp是推荐模型的一个很重要的维度，可惜暂时我们现在还没用上这个维度的数据。目前可以想到的一个点，就是在天的维度上做去马太效应。因为我们每天都会有推荐游戏，这些游戏可能只是因为同时出现在推荐位而被用户下载，而不是真正的因为共同的兴趣，最好是可以把这部分数据过滤掉。
 
 ##ItemSimilarity
-ItemSimilarity用来计算物品之间、用户之间的相似度。
+ItemSimilarity用来计算物品之间、用户之间的相似度。    
+
+首先让我们来看看它如何计算User之间的相似度的，这个是由`public double userSimilarity(long userID1, long userID2)`方法来实现的，而其核心的计算依赖于LogLikelihood.logLikelihoodRatio方法，这里有个blog介绍其[具体的算法](http://tdunning.blogspot.com/2008/03/surprise-and-coincidence.html)。里面提到的一个计算公式是根据 Shannon entropy 来计算相似度，即香农熵，貌似是信息论里面一个很熟悉的公式啊。
+
 
 
