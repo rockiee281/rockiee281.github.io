@@ -12,3 +12,52 @@ at值分别为3、6、9，也就是每次提取出比较的TopN的值，precisio
     by definition fallOut is "The proportion of non-relevant documents that are retrieved, out of all non-relevant documents available:" en.wikipedia.org/wiki/Information_retrieval#Fall-out As far as I know, it should be lowest as possible, but it also trivial to get 0% so you might evaluate your domain. – gpicchiarelli 
     about nDCG, it is a normalized version of DCG which means "Discounted Cumulative Gain". To be precise, take a look here en.wikipedia.org/wiki/Discounted_cumulative_gain – gpicchiarelli 
 上面回答中提到的wiki页面上也有很不错的内容
+
+一段最简单的item base的代码如下：
+
+	public void process(String inputFile, String outputData, String recommendItemNum) {
+
+		BufferedWriter bw = null;
+		try {
+			DataModel dataModel = new FileDataModel(new File(inputFile));
+			ItemSimilarity similarity = new LogLikelihoodSimilarity(dataModel);
+			ItemBasedRecommender recommender = new GenericBooleanPrefItemBasedRecommender(dataModel, similarity);
+			LongPrimitiveIterator it = dataModel.getItemIDs();
+
+			bw = new BufferedWriter(new FileWriter(new File(outputData)));
+			while (it.hasNext()) {
+				long baseItemId = it.next();
+				List<RecommendedItem> recommendResult = recommender.mostSimilarItems(baseItemId,
+						Integer.valueOf(recommendItemNum));
+				StringBuilder sb = new StringBuilder();
+				for (RecommendedItem recommendedItem : recommendResult) {
+					sb.append("," + recommendedItem.getItemID());
+				}
+				bw.append(baseItemId + sb.append("\n").toString());
+			}
+			bw.flush();
+		} catch (Exception e) {
+			logger.error("处理文件:【" + inputFile + "】失败", e);
+		} finally {
+			if (bw != null) {
+				try {
+					bw.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+	}
+
+##DataModel
+首先关注的是FileDataModel类，作为一个datamodel，负责从文本文件中抽取出数据，并做预处理。
+
+在FileDataModel的构造方法中，它首先会检查参数是否合法，通过封装了BufferedReader得到一个FileLineIterator对象用于读取文本内容，这里发现代码中大量使用了GWT的框架代码。比如使用Preconditions.checkArgument()来校验参数，用Splitter.on()来分割字符串，用Closeables.closeQuietly（）来关闭reader等，看来自己也得学习少造轮子了。FileDataModel中通过reload()方法来加载model，这里通过一个ReentrantLock来保证线程安全。在处理数据文件的时候，也会根据有没有preference数据、是否完全重新加载来做区分操作。在Data File中，如果格式为"userID,itemID,"就会删除对应的数据，如果带有Preference就删除Preference，相当于用户未对该Item打分；如果没有Preference则删除对应的Item，相当于用户未对Item有过行为。在保存数据文件的时候，它使用的是FastByIDMap，根据描述，它在有的场合下比JDK中自带的HashMap性能要好。嗯，也是根据高纳德的神书中的算法写出来的。最后得出来的rawdata就是一个fastByIDMap数据集和一个对应timestamp数据集，然后由他们生成一个GenericDataModel（有preference）或者GenericBooleanPrefDataModel（没有Preference）。    
+
+这里可以看出在mahout的设计者眼中，timestamp是推荐模型的一个很重要的维度，可惜暂时我们现在还没用上这个维度的数据。目前可以想到的一个点，就是在天的维度上做去马太效应。因为我们每天都会有推荐游戏，这些游戏可能只是因为同时出现在推荐位而被用户下载，而不是真正的因为共同的兴趣，最好是可以把这部分数据过滤掉。
+
+##ItemSimilarity
+ItemSimilarity用来计算物品之间、用户之间的相似度。
+
+
