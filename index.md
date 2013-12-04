@@ -1,9 +1,10 @@
 ---
 layout: page
-title: Hello World!
-tagline: Supporting tagline
+title: 醉卧沙场君莫笑
+tagline: 古来征战几人回
 ---
 {% include JB/setup %}
+<meta property="wb:webmaster" content="72932cce5c47b863" />
 
 Read [Jekyll Quick Start](http://jekyllbootstrap.com/usage/jekyll-quick-start.html)
 
