@@ -1,3 +1,5 @@
+<html xmlns:wb=“http://open.weibo.com/wb”>
+
 <div class="page-header">
   <h1>{{ page.title }} {% if page.tagline %}<small>{{page.tagline}}</small>{% endif %}</h1>
 </div>
@@ -44,6 +46,8 @@
       </ul>
     </div>
     <hr>
+    <script src="http://tjs.sjs.sinajs.cn/open/api/js/wb.js" type="text/javascript" charset="utf-8"></script>
+    <wb:share-button appkey="1879803397" addition="number" type="button"></wb:share-button>
     {% include JB/comments %}
   </div>
 </div>
