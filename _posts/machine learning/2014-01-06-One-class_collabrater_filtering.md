@@ -1,5 +1,5 @@
 ﻿---
-layout: post
+layout : post
 category : machine learning
 tags : [翻译,机器学习,OCCF]
 ---
