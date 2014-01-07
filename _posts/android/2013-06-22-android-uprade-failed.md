@@ -14,12 +14,11 @@ APP在启动的时候，会去服务器检查版本，发现有新版本的客�
 + 重启手机之后，再打开app一切正常，不会报错，界面也都是新版的了    
 
 就被这个bug给我折磨疯了…… 尝试了检查各种日志，然后还学习了strace这个神器，不过能力有限，很多日志看不明白。最后看了网上别人的在线app升级代码，发现问题可能是因为我们在安装新版本的代码时没有关闭目前正在运行的app引起的。所以就尝试把目前的升级代码：
-<pre>
-String filePath = (String) msg.obj;
-Intent intent = new Intent(Intent.ACTION_VIEW);
-intent.setDataAndType(Uri.parse("file://" + filePath), "application/vnd.android.package-archive");
-mContext.startActivity(intent);
-</pre>
+
+    String filePath = (String) msg.obj;
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.setDataAndType(Uri.parse("file://" + filePath), "application/vnd.android.package-archive");
+    mContext.startActivity(intent);
 进行了修改，增加了`System.exit(0)`，即在启动安装新版本的包之后，退出当前的app。进行了这次修改之后，发现解决了问题。    
 
 对问题稍微做一下总结：
@@ -33,8 +32,7 @@ BTW：之前升级也遇到过一个更白痴的问题，更新安装成功，�
 2013-7-31 update:
 本来以为事情到这就告一段落了，结果在后续的测试中发现还是有问题。虽然升级之后UI更新了，新功能也有了，但是其实还是会报错的。如果新旧版本中有删掉的activity或者改名了的，还是会报错。就是说，系统还是会去找原来的apk包。    
 后来在开发同学们仔细检查了应用的代码之后发现，android的manifest文件中有一行配置`android:persistent="true"`,去掉这一行之后再升级就不会有问题了。后来发现有一段对这个配置的解释:
-<pre>
-Whether or not the application should remain running at all times . The default value is "false". Applications should not normally set this flag; persistence mode is intended only for certain system applications(phone,system).
-</pre>    
+
+    Whether or not the application should remain running at all times . The default value is "false". Applications should not normally set this flag; persistence mode is intended only for certain system applications(phone,system).
 这样一来，之前kill不掉应用就可以解释了。
 
