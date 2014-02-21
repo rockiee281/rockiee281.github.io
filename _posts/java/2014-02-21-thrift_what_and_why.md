@@ -3,7 +3,10 @@ layout: post
 category : java
 tags : [java, thrift]
 ---
-这两天有点时间，琢磨下一直一知半解的thrift。thrift的[官网](http://thrift.apache.org/)中对它的介绍是：`The Apache Thrift software framework, for scalable cross-language services development, combines a software stack with a code generation engine to build services that work efficiently and seamlessly between C++, Java, Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa, JavaScript, Node.js, Smalltalk, OCaml and Delphi and other languages`，从字面意思上来理解，就是用于异构系统之间进行通讯用的。
+这两天有点时间，琢磨下一直一知半解的thrift。thrift的[官网](http://thrift.apache.org/)中对它的介绍是：
+```
+The Apache Thrift software framework, for scalable cross-language services development, combines a software stack with a code generation engine to build services that work efficiently and seamlessly between C++, Java, Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa, JavaScript, Node.js, Smalltalk, OCaml and Delphi and other languages
+```
 
 首先就是安装，按照官网的指导，下载了thrift的安装包，编译安装。thrift有官方的一个[白皮书](http://thrift.apache.org/static/files/thrift-20070401.pdf),看这格式很像论文的样子……安装就遇到问题了：    
 1. `libs/thrifttest_constants.o no such file or directory` 首先是用官网的tar包来make，遇到这个错误可耻的失败了。去了github clone一个回来，就ok了。
