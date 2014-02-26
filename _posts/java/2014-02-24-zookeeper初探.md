@@ -26,7 +26,7 @@ server.1=localhost:2887:2889
 server.2=localhost:3888:3889
 server.3=localhost:4888:4889
 ```
-上面是其中一个server的配置，clientPort开在了2181，这个是客户端用来连接zk server的；server配置中，第一个端口用于和leader通讯，第二个端口用于leader的选举。每个dataDir中要创建对应的myid文件，文件内容就是server的id。然后通过命令`bin/zkServer.sh  start conf/zoo.1.cfg`来分别启动3个server，就大功告成啦。
+上面是其中一个server的配置，clientPort开在了2181，这个是客户端用来连接zk server的；server配置中，第一个端口用于和leader通讯，第二个端口用于leader的选举。每个dataDir中要创建对应的myid文件，文件内容就是server的id。然后通过命令`bin/zkServer.sh  start conf/zoo.1.cfg`来分别启动3个server，就大功告成啦。在这之后可以用zk的bin目录提供的zkCli.sh来作为客户端访问zkserver(使用java客户端)，也可以在src/c目录下编译出来的cli_st和cli_mt来访问(使用C客户端)。在使用c客户端的时候就遇到的一个很恶心的问题……原来[zk的path中是可以有空格(\u0000)的](http://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkDataModel), 这样通过cli_st创建的node，最后node的data就变成node path的一部分了……。比如`create /app/data test`本来应该创建一个/app/data的node，里面包含的数据是test，结果创建出来一个`/app/data test`的节点出来了。
 
 ##zookeeper的使用
 还是在上面提到的那个样例中，作者介绍了一种很不错的zk使用办法。在创建zk的node时，加上`zookeeper.EPHEMERAL`和`zookeeper.SEQUENCE`。EPHEMERAL的节点是临时节点，当创建节点的客户端断掉链接之后，zk将删除这个节点；而加上SEQUENCE之后，zk会自动为创建的节点加上sequence number，方便为节点进行排序。这样，就可以使用一种巧妙的办法来做master-slaver状态维护。多个客户端在zk上创建节点，然后把sequence最小的那个节点作为master，同时所有的master都设置watcher监控；一旦master节点down掉，那么剩下节点中sequence最小的那个将继承为master，其他的slave节点也都会被通知到。这样就可以得到一个动态稳定的master-slaver结构。
