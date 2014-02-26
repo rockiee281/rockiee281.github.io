@@ -7,7 +7,7 @@ tags : [分布式]
 
 
 ##什么是zookeeper
-zookeeper贵为[apache的顶级项目](http://zookeeper.apache.org/),在它的介绍中说`ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services`，看见zk可以用来做配置管理、名称服务管理、分布式同步和提供集群服务。
+zookeeper贵为[apache的顶级项目](http://zookeeper.apache.org/),在它的介绍中说```ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services```，看见zk可以用来做配置管理、名称服务管理、分布式同步和提供集群服务。
 
 
 ##zookeeper的安装配置
@@ -15,4 +15,4 @@ zookeeper贵为[apache的顶级项目](http://zookeeper.apache.org/),在它的�
 
 
 ##zookeeper的使用
-还是在上面提到的那个样例中，作者介绍了一种很不错的zk使用办法。
+还是在上面提到的那个样例中，作者介绍了一种很不错的zk使用办法。在创建zk的node时，加上`zookeeper.EPHEMERAL`和`zookeeper.SEQUENCE`。EPHEMERAL的节点是临时节点，当创建节点的客户端断掉链接之后，zk将删除这个节点；而加上SEQUENCE之后，zk会自动为创建的节点加上sequence number，方便为节点进行排序。这样，就可以使用一种巧妙的办法来做master-slaver状态维护。多个客户端在zk上创建节点，然后把sequence最小的那个节点作为master，同时所有的master都设置watcher监控；一旦master节点down掉，那么剩下节点中sequence最小的那个将继承为master，其他的slave节点也都会被通知到。这样就可以得到一个动态稳定的master-slaver结构。
