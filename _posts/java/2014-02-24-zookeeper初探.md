@@ -30,3 +30,9 @@ server.3=localhost:4888:4889
 
 ##zookeeper的使用
 还是在上面提到的那个样例中，作者介绍了一种很不错的zk使用办法。在创建zk的node时，加上`zookeeper.EPHEMERAL`和`zookeeper.SEQUENCE`。EPHEMERAL的节点是临时节点，当创建节点的客户端断掉链接之后，zk将删除这个节点；而加上SEQUENCE之后，zk会自动为创建的节点加上sequence number，方便为节点进行排序。这样，就可以使用一种巧妙的办法来做master-slaver状态维护。多个客户端在zk上创建节点，然后把sequence最小的那个节点作为master，同时所有的master都设置watcher监控；一旦master节点down掉，那么剩下节点中sequence最小的那个将继承为master，其他的slave节点也都会被通知到。这样就可以得到一个动态稳定的master-slaver结构。
+
+###zookeeper的watch
+zk的watch是个很有趣的特性，所有的读操作(getData()\getChildren()\exists())，都可以设置一个watch。在[官网的介绍](http://zookeeper.apache.org/doc/trunk/zookeeperProgrammers.html#ch_zkWatches)中提到它的三个关键点：
+1. One-time trigger。zk的watch不是持续的监控而是一次性的，当watch被触发之后，就会被清除掉，如果还想继续监控某个node的话，需要再设置一次watch
+2. Sent to client。change是有zk的server发动给client的，只有client设置watch之后的change才会发送给对应的client。
+3. The data for which the watch was set。通过三种不同的读操作设置的watch，会收到不同操作的响应，比如getdata()和exists()会返回node中data的信息，因此setData()操作会触发这两者的watch；create()操作成功同样会触发这两者以及监控父节点的getChildren()等等
