@@ -36,3 +36,20 @@ zk的watch是个很有趣的特性，所有的读操作(getData()\getChildren()\
 1. One-time trigger。zk的watch不是持续的监控而是一次性的，当watch被触发之后，就会被清除掉，如果还想继续监控某个node的话，需要再设置一次watch
 2. Sent to client。change是有zk的server发动给client的，只有client设置watch之后的change才会发送给对应的client。
 3. The data for which the watch was set。通过三种不同的读操作设置的watch，会收到不同操作的响应，比如getdata()和exists()会返回node中data的信息，因此setData()操作会触发这两者的watch；create()操作成功同样会触发这两者以及监控父节点的getChildren()等等
+
+###zookeeper的stat structure
+执行语句`get /app/workers`，可以得到下面的结果：
+```
+cZxid = 0x800000003
+ctime = Thu Feb 27 22:49:40 CST 2014
+mZxid = 0x800000003
+mtime = Thu Feb 27 22:49:40 CST 2014
+pZxid = 0xe00000003
+cversion = 23
+dataVersion = 0
+aclVersion = 0
+ephemeralOwner = 0x0
+dataLength = 0
+numChildren = 1
+```
+在zk的官网上对上面这些参数有做解释。首先要说明的是zxid(Zookeeper transaction id),zookeeper每发生一次变化zxid就会自增一次，zxid可以被视作zookeeper状态变化的一个序号。所以如果zxid1小于zxid2，那么zxid1就一定发生在zxid2之前。cZxid是znode被创建时的时间节点，而mZxid则是znode最后被修改的时间节点，pZxid是最后更改的children时间；ctime和mtime就比较好理解了，这个是绝对时间；cversion是它的children node发生变化的次数，dataversion我猜是znode的data变化的次数，aclversion则是该node的zcl变化的次数；datalength是znode data的长度；ephemeralOwner如果该node是ephemeral node，这个字段就是它拥有者的session id，否则是0x00；numChildren指该znode的子节点个数
