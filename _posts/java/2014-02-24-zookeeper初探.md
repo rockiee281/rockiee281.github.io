@@ -60,3 +60,11 @@ numChildren = 1
 + zookeeper的client会在连接成功的时候告诉服务器连接超时时间，而服务器会返回一个它接受的超时时间，目前这个值是tickTime的2倍到20倍之间。
 
 + zookeeper的client会自动重连，一般情况下不要自己编写代码去手动的重连，除非是遇到了session过期，session过期是由zkserver而不是client来管理的。当zkserver在timeout时间内没有收到来自client的心跳，就会认为是session已经过期了。
+
+##zookeeper的一致性保证
++ 顺序一致性，client提交的更新请求一定会按照提交的顺序执行
++ 原子性，更改要么全部成功要么全部失败。
++ 单一系统镜像，客户端在连接各个server的时候读取到的数据是一样的。但是这里需要注意，zk并不保证数据的更新是同步的，所以如果要求多个client读取到的数据是同步的，需要在读取之前调用sync()方法
++ 可靠性。一个更新一旦应用成果，它就会被持久化知道一个新的更新覆盖它。
++ timelines(时间轴？)。
+基于zookeeper的这些特性，可以以zk为基础做出很多有用的分布式系统出来，zk官方也做了一个[文档](http://zookeeper.apache.org/doc/trunk/recipes.html)介绍，这些个就留到后面再开一篇好了。
