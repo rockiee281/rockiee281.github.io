@@ -29,6 +29,10 @@ email: rockiee281@gmail.com
 #
 production_url : http://rockiee281.github.io
 
+markdown: redcarpet
+redcarpet:
+    extensions: ["fenced_code_blocks", "autolink", "tables", "strikethrough"]
+
 # All Jekyll-Bootstrap specific configurations are namespaced into this hash
 #
 JB :
