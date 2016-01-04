@@ -1,5 +1,3 @@
-<html xmlns:wb=“http://open.weibo.com/wb”>
-
 <div class="page-header">
   <h1>{{ page.title }} {% if page.tagline %}<small>{{page.tagline}}</small>{% endif %}</h1>
 </div>
@@ -46,8 +44,19 @@
       </ul>
     </div>
     <hr>
-    <script src="http://tjs.sjs.sinajs.cn/open/api/js/wb.js" type="text/javascript" charset="utf-8"></script>
-    <wb:share-button appkey="1879803397" addition="number" type="button"></wb:share-button>
+	<script type="text/javascript">
+	(function(){
+	var url = "http://widget.weibo.com/distribution/comments.php?width=0&url=auto&fontsize=14&ralateuid=1080220894&appkey=1879803397&dpc=1";
+	url = url.replace("url=auto", "url=" + encodeURIComponent(document.URL)); 
+	document.write('<iframe id="WBCommentFrame" src="' + url + '" scrolling="no" frameborder="0" style="width:100%"></iframe>');
+	})();
+	</script>
+	<script src="http://tjs.sjs.sinajs.cn/open/widget/js/widget/comment.js" type="text/javascript" charset="utf-8"></script>
+	<script type="text/javascript">
+	window.WBComment.init({
+	    "id": "WBCommentFrame"
+		});
+	</script>
     {% include JB/comments %}
   </div>
 </div>
