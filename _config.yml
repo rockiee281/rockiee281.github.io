@@ -4,7 +4,6 @@ permalink: /:categories/:year/:month/:day/:title
 
 exclude: [".rvmrc", ".rbenv-version", "README.md", "Rakefile", "changelog.md"]
 auto: true
-pygments: true
 
 # Themes are encouraged to use these universal variables 
 # so be sure to set them if your theme uses them.
@@ -14,6 +13,7 @@ tagline: Site Tagline
 author: stone
 name: rockiee
 email: rockiee281@gmail.com
+port: 4001
 
 #  github : username
 #  twitter : 
@@ -29,10 +29,11 @@ email: rockiee281@gmail.com
 #
 production_url : http://rockiee281.github.io
 
-markdown: redcarpet
+markdown: kramdown
+kramdown:
+  input: GFM
 redcarpet:
     extensions: ["fenced_code_blocks", "autolink", "tables", "strikethrough"]
-pygments: true
 # All Jekyll-Bootstrap specific configurations are namespaced into this hash
 #
 JB :
@@ -130,4 +131,11 @@ JB :
   # and include your custom code. Your custom file must be defined at:
   #   ./_includes/custom/[HELPER]
   # where [HELPER] is the name of the helper you are overriding.
-  
+ 
+
+# Buidin settings 
+paginate: 10
+highlighter: pygments
+
+# SNS setting
+weibo_comment: true
