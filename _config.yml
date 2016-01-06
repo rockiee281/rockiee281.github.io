@@ -139,3 +139,10 @@ highlighter: pygments
 
 # SNS setting
 weibo_comment: true
+weibo_username: rockiee281
+github_username: rockiee281
+zhihu_username: huai-zuo-qing-yi
+
+# Sidebar settings
+sidebar: true                           # whether or not using Sidebar.
+sidebar-about-description: "It seems that I have been but a little child playing on the seashore; now finding some pebble rather more polished, and now some shell rather more agreeably variegated than another, while the immense ocean of truth extended itself unexplored before me."
