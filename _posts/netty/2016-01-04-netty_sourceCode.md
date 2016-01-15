@@ -11,7 +11,7 @@ tags : [netty,source code]
 2. EventLoop如何实现的，另外看看它如何让CPU利用率更高效
 3. FrameWork层如何设计，更好的扩展以及封装底层API
 
-Netty 4.x的包结构大概是：
+Netty 5.x的包结构大概是：
 
     io.netty
        |-bootstrap
