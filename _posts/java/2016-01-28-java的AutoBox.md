@@ -1,7 +1,7 @@
 ---
 layout: post
 category : java
-tags : [java, multithread, yield]
+tags : [java]
 ---
 {% highlight java %}
  	Integer a = new Integer(1);
@@ -25,4 +25,5 @@ tags : [java, multithread, yield]
         System.out.println(c == d); // true
 
 {% endhighlight %}
+
 今天组里的同学问起Integer能不能直接用==比较，直觉是不行的。但是发现java在autobox的时候，貌似用的是有cache？通过autobox出来的对象是同一个，估计是放在常量池的？Integer.valueOf是把128以内的放在了cache里面，这个倒是比较明确的。
