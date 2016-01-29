@@ -22,7 +22,7 @@ tags : [java]
 
         Integer g = 23321;
         Integer h = 23321;
-        System.out.println(g == h); // true
+        System.out.println(g == h); // false
 
 {% endhighlight %}
 
