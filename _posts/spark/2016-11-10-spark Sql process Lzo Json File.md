@@ -7,6 +7,8 @@ tags : [spark SQL, Lzo, Json]
 
 先用LzoTextInputFormat加载RDD，然后转化成RDD[String]，最后让sparkSqlContext直接去读这个RDD。
 
+BTW:这里需要注意另外一个问题，使用Lzo做存储格式的时候，需要建立index，否则是不能做并行处理的……之前采用gz的格式存储数据，就吃了这个亏。
+
 ```scala
 import org.apache.hadoop.io._
 import com.hadoop.mapreduce._
