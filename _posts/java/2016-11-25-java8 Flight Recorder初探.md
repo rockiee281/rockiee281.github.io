@@ -32,7 +32,7 @@ JvmTop 0.8.0 alpha   amd64  8 cpus, Linux 2.6.32-27, load avg 0.12
 ### jmap & jhat
 回到传统的解决办法，使用jmap抓去heap，然后用jhat去分析dump文件。一般平时几个G的内存，都可以jmap抓完dump拿回来用jprofiler或者IBM贡献的Memory Analyzer去分析，但是这40多个G的内存，只有Memory Analyzer能分析了，jprofiler受限于分析模式，对于大的dump无能为了。但是40多G的话我自己电脑的磁盘空间都不够啊！！！！所以老老实实的用jhat在服务器上直接分析吧。这时候还发现另外一个问题，虽然用jstat去看内存占用了几十G，抓下来的dump文件却只有6.3G，也就是说大量的都是new出来的对象，抓下来的dump中都已经被gc掉了，更无迹可寻，这下头疼了
 
-h3. jfr
+### jfr
 这时候就想起了java flight recorder(jfr)。之前也用过他去分析过jvm进程，但是根据官方的文档，命令行工具的选项一共就那么几个，没看到怎么去获取内存的分配情况。官方文档中示例的命令如下`sudo -u hadoop jcmd 75280 JFR.start duration=360s filename=/tmp/rockiee.jfr` 。 这个命令会启动jfr，在360s内做抽样然后把jfr文件保存在tmp目录下。但是这样抓下来只能看到很少的信息，jdk工具包里面的java Mission Control里面倒是可以启动对内存分配的分析，但是官方文档里面死活没找到命令行怎么办啊…… 还好，在全球最大的同性交友网站堆栈溢出上找到了一个很棒的帖子:[http://stackoverflow.com/questions/19056826/java-mission-control-heap-profile] 按照这里面的介绍，从Mission Control里面export出来配置文件，然后用` sudo -u hadoop jcmd 75280 JFR.start duration=360s settings=/tmp/my.jfc  filename=/tmp/rockiee.jfr` 这个命令重新抓取jfr文件。这回在Java Mission Control里面打开jfr文件，就能看到漂亮的各种视图了。
 
 ![thread](/img/in-post/thread.jpg)
