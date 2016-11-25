@@ -13,8 +13,9 @@ Oracle在收购Bea之后拿到之前他家灰常牛逼的JVM技术JRockit，其�
 
 ### jvmtop
 google上扒出来的一个工具，别人自己写的一个util，可以方便的看出内存增长、cpu占用、gc情况。很好用，地址是:[https://github.com/patric-r/jvmtop]。
-```
- JvmTop 0.8.0 alpha   amd64  8 cpus, Linux 2.6.32-27, load avg 0.12
+
+``` 
+JvmTop 0.8.0 alpha   amd64  8 cpus, Linux 2.6.32-27, load avg 0.12
  https://github.com/patric-r/jvmtop
 
   PID MAIN-CLASS      HPCUR HPMAX NHCUR NHMAX    CPU     GC    VM USERNAME   #T DL
@@ -25,6 +26,7 @@ google上扒出来的一个工具，别人自己写的一个util，可以方便�
 16733 artup.Bootstrap  159m  455m  166m  304m  0.12%  0.00% S6U37 web        46
 
 ```
+
 但是它解决不了我们的问题，我们需要的是去了解堆内部对象的创建及使用，pass！
 
 ### jmap & jhat
