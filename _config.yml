@@ -109,7 +109,7 @@ JB :
   analytics :
     provider : google 
     google : 
-        tracking_id : 'UA-46197420-1'
+        tracking_id : 'UA-46197420-2'
     getclicky :
       site_id : 
     mixpanel :
