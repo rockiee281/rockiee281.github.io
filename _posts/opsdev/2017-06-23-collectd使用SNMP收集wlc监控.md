@@ -25,13 +25,15 @@ collectd通过snmp协议收集指标，感觉都是很成熟的东西了，应�
         Interval 30
     </Host>
 ```
+
 ## 基本概念
 先说下几个概念：
-* SNMP：简单网络管理协议，可以通过这个协议去网络设备获取一些信息，也可以设置参数。这里我们通过SNMP协议抓取监控指标
-* MIB：[Management information base](https://en.wikipedia.org/wiki/Management_information_base) 供SNMP协议管理实体使用的数据库文件，简单来理解也可以把它当作一种scheme定义。
-* ASN: [Abstract Syntax Notation One](https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One) ASN是一种接口描述语言，
-* SMIv2：[Structure of Management Information Version 2](https://tools.ietf.org/html/rfc1155) 是MIB使用的ASN
-* OID：[Object identifier](https://en.wikipedia.org/wiki/Object_identifier) 可以理解为每个指标的名称，应该是全局唯一的比如`1.3.6.1.4.1.14179.1.1.1.12`就是一个OID，对应的名称是`agentInventoryManufacturerName`。目测的话，OID是遵循前缀层级的。
+
++ SNMP：简单网络管理协议，可以通过这个协议去网络设备获取一些信息，也可以设置参数。这里我们通过SNMP协议抓取监控指标
++ MIB：[Management information base](https://en.wikipedia.org/wiki/Management_information_base) 供SNMP协议管理实体使用的数据库文件，简单来理解也可以把它当作一种scheme定义。
++ ASN: [Abstract Syntax Notation One](https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One) ASN是一种接口描述语言，
++ SMIv2：[Structure of Management Information Version 2](https://tools.ietf.org/html/rfc1155) 是MIB使用的ASN
++ OID：[Object identifier](https://en.wikipedia.org/wiki/Object_identifier) 可以理解为每个指标的名称，应该是全局唯一的比如`1.3.6.1.4.1.14179.1.1.1.12`就是一个OID，对应的名称是`agentInventoryManufacturerName`。目测的话，OID是遵循前缀层级的。
 
 
 ## 环境准备
