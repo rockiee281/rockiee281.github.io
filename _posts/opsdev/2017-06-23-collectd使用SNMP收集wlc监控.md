@@ -39,7 +39,8 @@ collectd通过snmp协议收集指标，感觉都是很成熟的东西了，应�
 ## 环境准备
 那么现在要做的事情就很简单了，首先参考[这个帖子](http://awesomeadmin.blogspot.jp/2009/11/monitoring-cisco-wireless-controller.html) 找到监控cisco 2500 wlc需要的MIB，http://www.oidview.com/mibs/14179/AIRESPACE-SWITCHING-MIB.html、http://www.oidview.com/mibs/14179/AIRESPACE-WIRELESS-MIB.html.当然，还有关联的一坨MIB文件，
 下载下来的MIB文件放到原来的MIB文件夹中，比如`/usr/share/snmp/mibs/`,然后创建一个`/etc/snmp/snmp.conf`文件，把这些MIB文件导入进来就好了,样例如下。
-{% highlight bash %}
+
+```bash
 mibs +AIRESPACE-SWITCHING-MIB
 mibs +AIRESPACE-WIRELESS-MIB
 mibs +AIRESPACE-REF-MIB
@@ -47,9 +48,10 @@ mibs +Q-BRIDGE-MIB
 mibs +P-BRIDGE-MIB
 mibs +RMON2-MIB
 mibs +TOKEN-RING-RMON-MIB
-{% endhighliht %}
+```
 
 这样一来，运行`snmpwalk`之类的命令测试的时候，看到的就不是一对数字啦，而是会比较好识别的OID指标的英文名称。比如`snmpwalk  -v 2c -c public  -OX  xxx.xxx.xx.xx  1.3.6.1.2.1.31.1.1.1.10`,会返回如下内容：
+
 ```bash
 IF-MIB::ifHCOutOctets[1] = Counter64: 2788540709866
 IF-MIB::ifHCOutOctets[2] = Counter64: 0
