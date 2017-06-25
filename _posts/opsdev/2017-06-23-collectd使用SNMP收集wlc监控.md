@@ -35,8 +35,15 @@ collectd通过snmp协议收集指标，感觉都是很成熟的东西了，应�
 + SMIv2：[Structure of Management Information Version 2](https://tools.ietf.org/html/rfc1155) 是MIB使用的ASN
 + OID：[Object identifier](https://en.wikipedia.org/wiki/Object_identifier) 可以理解为每个指标的名称，应该是全局唯一的比如`1.3.6.1.4.1.14179.1.1.1.12`就是一个OID，对应的名称是`agentInventoryManufacturerName`。目测的话，OID是遵循前缀层级的。
 
+一般而言，针对多值的指标，使用table指明指标index对应的值，然后在做snmpwalk的时候通过OID+OID_INDEX获取对应的指标。但是对于cisco的wlc就遇到一个恶心的问题，
+它的AP指标格式是OID+OID_INDEX+0/1，OID_INDEX是AP的mac地址，可以通过table转成AP的name，但是因为最后区分2.4G/5G网络，多出来了一级0或者1，就导致collectd
+无法正常的解析AP的指标。没有仔细研究collectd的源码，不过在遇到value数量和table数量不匹配的时候，collectd就自动放弃解析了。网络上搜了半天也没看到现成的解决办法，
+心一横，那就自己来呗？原理既然清楚了，那就自己来好了。用<s>最好的编程语言</s>python去收集指标，然后collectd支持python的plugin，问题分分钟解决。
 
 ## 环境准备
+
+### 安装MIB
+
 那么现在要做的事情就很简单了，首先参考[这个帖子](http://awesomeadmin.blogspot.jp/2009/11/monitoring-cisco-wireless-controller.html) 找到监控cisco 2500 wlc需要的MIB，http://www.oidview.com/mibs/14179/AIRESPACE-SWITCHING-MIB.html、http://www.oidview.com/mibs/14179/AIRESPACE-WIRELESS-MIB.html.当然，还有关联的一坨MIB文件，
 下载下来的MIB文件放到原来的MIB文件夹中，比如`/usr/share/snmp/mibs/`,然后创建一个`/etc/snmp/snmp.conf`文件，把这些MIB文件导入进来就好了,样例如下。
 
@@ -59,5 +66,144 @@ IF-MIB::ifHCOutOctets[3] = Counter64: 0
 IF-MIB::ifHCOutOctets[4] = Counter64: 0
 IF-MIB::ifHCOutOctets[5] = Counter64: 0
 ```
+### 安装软件环境
+本人使用的python版本是2.7，OS版本centos7，其他平台未经测试。
+
++ 通过pip安装python的easysnmp和collect库
++ 安装collectd，这里最好是从源码编译。二进制版本的话，logfile不支持debug级别，不方便查问题。自己从github下载源码，然后编译时候通过`--enable-debug`打开debug日志
+
 
 ## 脚本
+
+### python部分
+python脚本命名为get_wlc_collectd.py,可以放到任意喜欢的目录下去
+
+```python
+from easysnmp import Session
+import collectd
+import re
+
+CONFIGS = []
+
+def config(conf):
+  collectd.info('------ config ------')
+
+  for node in conf.children:
+    key = node.key.lower()
+    val = node.values[0]
+    if key == 'host':
+      host = val
+    elif key == 'community':
+      community = val
+    elif key == 'version':
+      version = int(val)
+    else:
+      collectd.warning('get_wlc_collectd plugin: Unknown config key: %s' % key)
+  CONFIGS.append({
+    'host': host,
+    'community': community,
+    'version': version
+  })
+
+
+def read():
+  pattern = re.compile(r'(.*)\.(\d+)')
+
+  for config in CONFIGS:
+    import json
+    session = Session(hostname=config['host'], community=config['community'], version=config['version'])
+
+    # Perform an SNMP walk
+    ap_name_items = session.walk('1.3.6.1.4.1.14179.2.2.1.1.3')
+    ap_table = {}
+    for ap in ap_name_items:
+      ap_table[ap.oid_index] = ap.value
+
+    multi_items = (('user_of_ap_items','1.3.6.1.4.1.14179.2.2.13.1.4'), ('rx_util_items', '1.3.6.1.4.1.14179.2.2.13.1.1'), ('tx_util_items','1.3.6.1.4.1.14179.2.2.13.1.2'), ('channel_util_items','1.3.6.1.4.1.14179.2.2.13.1.3'), ('num_of_channel_used_items','1.3.6.1.4.1.14179.2.2.2.1.4'), ('load_of_ap_items','1.3.6.1.4.1.14179.2.2.16.1.1'), ('noise_of_ap_items','1.3.6.1.4.1.14179.2.2.16.1.3'), ('interference_of_ap_items','1.3.6.1.4.1.14179.2.2.16.1.2'), ('coverage_of_ap_items','1.3.6.1.4.1.14179.2.2.16.1.4'))
+
+    for target in multi_items:
+      result = session.walk(target[1])
+      for item in result:
+        match = pattern.match(item.oid_index)
+        if match:
+          oid_index = match.group(1)
+          wifi_type = match.group(2)
+          ap_name = ap_table[oid_index]
+	else:
+	  continue
+	val = collectd.Values(plugin='get_wlc_collectd')
+	val.type = 'gauge'
+	val.type_instance = ap_name + "." + wifi_type + "." + item.oid
+	val.values = [item.value]
+	val.dispatch()
+
+    single_items = []
+    single_items.append(('bsnAPOperationStatus', '1.3.6.1.4.1.14179.2.2.1.1.6'))
+
+    for target in single_items:
+      result = session.walk(target[1])
+      for item in result:
+	val = collectd.Values(plugin='get_wlc_collectd')
+	val.type = 'gauge'
+	val.type_instance = ap_table[item.oid_index] + "." + item.oid
+	val.values = [item.value]
+	val.dispatch()
+
+collectd.register_config(config)
+collectd.register_read(read)
+
+```
+
+
+### collectd配置
+
+```bash
+FQDNLookup   false
+Interval 30
+
+Timeout  15
+ReadThreads  30
+WriteThreads 10
+
+LoadPlugin logfile
+<Plugin logfile>
+    LogLevel "debug"
+    File "/var/log/collectd.log"
+    Timestamp true
+    PrintSeverity false
+</Plugin>
+
+LoadPlugin python
+<Plugin python>
+        ModulePath "/home/q/tools/bin/"
+        Import "get_wlc_collectd"
+
+        <Module get_wlc_collectd>
+                host xx.xx.xx.xx
+		community public
+		version 2
+        </Module>
+
+</Plugin>
+
+#LoadPlugin csv
+#<Plugin "csv">
+#  DataDir "/var/lib/collectd/csv"
+#  StoreRates true
+#</Plugin>
+
+LoadPlugin write_graphite
+<Plugin write_graphite>
+  <Node "watcher_net">
+    Host "xx.xx.0.xx"
+    Port "2003"
+    Protocol "tcp"
+    Prefix "h."
+    EscapeCharacter "."
+  </Node>
+</Plugin>
+
+```
+
+我们目前是把指标输出到graphite，为了测试方便可以先以CSV格式输出到本地。这里需要注意一点的是，为了方便后面在grafana里面针对各个维度聚合，指标名称里面是包含了`.`的，
+所以用`EscapeCharacter "."` 保留dot，否则默认的话会被write_graphite插件转成下划线。
