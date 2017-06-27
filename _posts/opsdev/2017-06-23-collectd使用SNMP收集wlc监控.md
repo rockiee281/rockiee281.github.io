@@ -26,6 +26,8 @@ collectd通过snmp协议收集指标，感觉都是很成熟的东西了，应�
     </Host>
 ```
 
+当然，在折腾了一圈之后，发现有人用zabbix解决了这个问题，具体参见：https://github.com/B4ckF0rw4rd/Zabbix-Templates
+
 ## 基本概念
 先说下几个概念：
 
