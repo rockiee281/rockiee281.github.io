@@ -68,6 +68,7 @@ IF-MIB::ifHCOutOctets[3] = Counter64: 0
 IF-MIB::ifHCOutOctets[4] = Counter64: 0
 IF-MIB::ifHCOutOctets[5] = Counter64: 0
 ```
+
 ### 安装软件环境
 本人使用的python版本是2.7，OS版本centos7，其他平台未经测试。
 
