@@ -12,7 +12,7 @@ tags : [golang,glide,seaweedfs]
 所以这回打算硬着头皮，把go和seaweedfs一起研究一下。
 
 # 0x01
-老规矩，下go的包、源码，下seaweedfs的源码。google了一下，目前好用的golang ide也就是vim或者netbrain出品的，所以还是用intellj+go plugin的组合。首先遇到的一个拦路虎就是GOPATH和GOROOT这俩兄弟，按照之前java的套路，GOROOT比较好理解，设置为go的根目录就OK了，很快也就解决了。但是GOPATH一开始理解错误了，其实如果从全局而言，相当于把我依赖的所有lib都放到这里来。golang这里感觉更暴力了，直接拉扯源码下来，不过我喜欢 :)   从我的理解，其实就是把自己的代码和依赖的lib一视同仁，都放到一个大的workspace下面去，听起来很有Google的风格。Golang自带`go get`命令去获取依赖，seaweedfs项目使用[glide](https://github.com/bumptech/glide)去做依赖管理，配置文件是yaml格式的，还是比较友好的。过程中为了解决google坑爹的依赖路径问题，使用glide的mirror来解决类似grpc等修改了托管的地址却没有改包名这种坑爹的行为，参考：[https://github.com/Chyroc/chyroc.github.io/issues/26]。 glide会默认把mirror文件放到`${home}/.glide`目录下，找了半天才发现……我的mirror文件如下，可以参考：
+老规矩，下go的包、源码，下seaweedfs的源码。google了一下，目前好用的golang ide也就是vim或者netbrain出品的，所以还是用intellj+go plugin的组合。首先遇到的一个拦路虎就是GOPATH和GOROOT这俩兄弟，按照之前java的套路，GOROOT比较好理解，设置为go的根目录就OK了，很快也就解决了。但是GOPATH一开始理解错误了，其实如果从全局而言，相当于把我依赖的所有lib都放到这里来。golang这里感觉更暴力了，直接拉扯源码下来，不过我喜欢 :)   从我的理解，其实就是把自己的代码和依赖的lib一视同仁，都放到一个大的workspace下面去，听起来很有Google的风格。Golang自带`go get`命令去获取依赖，seaweedfs项目使用[glide](https://github.com/bumptech/glide)去做依赖管理，配置文件是yaml格式的，还是比较友好的。过程中为了解决google坑爹的依赖路径问题，使用glide的mirror来解决类似grpc等修改了托管的地址却没有改包名这种坑爹的行为，参考：[https://github.com/Chyroc/chyroc.github.io/issues/26]、[https://my.oschina.net/u/553243/blog/1475626]。 glide会默认把mirror文件放到`${home}/.glide`目录下，找了半天才发现……我的mirror文件如下，可以参考：
 ```yaml
 repos:
 - original: https://golang.org/x/crypto
