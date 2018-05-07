@@ -43,7 +43,7 @@ repos:
 - original: https://google.golang.org/genproto
   repo: https://github.com/google/go-genproto
   vcs: git
-{% end highlight %}        
+{% endhighlight %}        
 编译、安装好glide，配置好mirror，然后就可以执行`glide install` 来安装依赖了。
 
 这里必须继续吐槽一句，win下面用这些工具总有奇怪得问题……还好win10开启了ubuntu，进入ubuntu下面分分钟搞定了环境，`go build` 也成功了，总算可以开始研究代码了
