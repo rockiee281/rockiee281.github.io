@@ -46,3 +46,25 @@ repos:
 编译、安装好glide，配置好mirror，然后就可以执行`glide install` 来安装依赖了。
 
 这里必须继续吐槽一句，win下面用这些工具总有奇怪得问题……还好win10开启了ubuntu，进入ubuntu下面分分钟搞定了环境，`go build` 也成功了，总算可以开始研究代码了
+
+# 0x02
+不过在看代码之前，因为作者说是基于Facebook的论文开发的，那就先看看论文呗。Haystack是作为NFS的替代品而出现的，NFS的问题是存储的文件数量一旦太多，对metadata的lookup就会成为一个很大的瓶颈。在Haystack的论文中提到：`We carefully reduce this per photo metadata so that Haystack storage machines can perform all metadata lookups in main memory. This choice conserves disk operations for reading actual data and thus increases overall throughput` 首先是减少了metadata的量，因为变少了所以可以把metadata都放入内存，就能把磁盘的IO性能完全释放出来给文件读写使用。 使用的场景：`written once, read often, never modified, and rarely deleted.` 传统基于POSIX文件系统的弊端在于他们需要保存文件的权限信息，而这对于图像等文件存储服务而言意义不大，只是额外消耗。一次文件读取需要有三次操作：
++ 把文件名转换为inode
++ 从磁盘上读取inode
++ 根据inode去读取实际文件
+
+所以Facebook基于以下几个目标重新设计了一个对象存储：高吞吐低延迟、支持故障转移、存储高效、结构简单。起初Facebook的方案是NAS，上面再架Photo Server。但是在文件数量多的时候还是会有问题，他们甚至尝试过直接cache文件的file handle，然后直接通过file handle走系统调用直接访问文件，但是提升效果并不明显。
+Facebook设计的haystack分成了三个部分的服务：directory、cache和store。
+
+
+Directory服务可以被视为主服务，提供了三个方面的功能：
++ 逻辑卷到物理卷的映射
++ 文件读写的负载均衡
++ 决定文件的读取是走cdn还是cache服务
++ 可以把卷标记为只读，可能是主动操作，也可能是磁盘空间已满等
+考虑到directory要存储大量信息，这里他们采用了PHP+memcache的方案，缓存中的entry当节点下线的时候被摘除，上线的时候重新注册上来。
+
+
+Cache服务比较简单好懂了，这里有两个缓存的原则：
++ 只有用户请求来的需要被缓存，CDN穿透过来的不用。因为一般CDN拦不住的，基本上本地也不会有cache
++ 只有从一个可写节点读到的文件才会被缓存。理由是一般photo都是在刚刚被上传之后的一段时间内访问频繁；另外，一台节点同一时间读、写只做一件事情的时候效率最高，把读请求cache住，可以让写操作有更高的吞吐。
