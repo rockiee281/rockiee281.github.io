@@ -74,3 +74,20 @@ Cache服务比较简单好懂了，这里有两个缓存的原则：
 + 只有从一个可写节点读到的文件才会被缓存。理由是一般photo都是在刚刚被上传之后的一段时间内访问频繁；另外，一台节点同一时间读、写只做一件事情的时候效率最高，把读请求cache住，可以让写操作有更高的吞吐。
 
 Storage就是直接和物理磁盘打交道了，这里Facebook建议采用xfs文件系统，因为这个占用的物理空间会更少一下。然后会把物理节点拆分成各个虚拟的Volume，Volume内部是一个个的needle。needle中其实完整保存了文件数据及相关的meta信息。但是为了快速的存取文件，又设计了index文件，index文件中主要是存offset和datasize，因为index文件本身比较小，可以完全放到内存中。需要注意的一点是index文件在删除的时候不会同步删除，而是在标记完数据文件之后，异步清理index数据。最终会通过类似compact的操作，对data中的碎片文件进行整理。而在整理之前，如果有访问被删除文件的请求打过来的话，可以再异步的清理index中的数据。
+
+因为之前有对seaweedfs的了解，回过头来看haystack的论文就好理解多了。论文就看到这里，开始准备去看seaweedfs的源码了。
+
+# 0x03
+开始读代码之前，还是要补一些go的基本语法。这次就不从头开始学起了，直接基于读代码过程中发现不理解的地方，一个点一个点的去了解。
+
+## interface
+发现golang中也是有interface的，go中的interface可以被任意对象实现，任意的类型都实现了空interface(我们这样定义：interface{})，也就是包含0个method的interface。这个有点类似之前去看ruby代码时候了解到的duck类型，go这里也是类似的。完全由类型本身实现的方法来决定它是否继承了某个interface，而不是依赖于静态语法检查。这样写起来应该是有极高的自由度的，想想就觉得酷炫啊。但是如果没有IDE的支持，不知道开发起来会不会觉得麻烦？
+
+## func
+和其他语言类似，不同之处在于可以支持多返回值，然后可以指定func是属于某个Type的，类似：
+<% highlight go %>
+
+func (k Key) String() string {
+	return strconv.FormatUint(uint64(k), 10)
+}
+<% endhighlight %>
