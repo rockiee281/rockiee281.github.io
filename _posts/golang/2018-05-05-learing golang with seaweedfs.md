@@ -85,8 +85,9 @@ Storage就是直接和物理磁盘打交道了，这里Facebook建议采用xfs�
 
 ## func
 和其他语言类似，不同之处在于可以支持多返回值，然后可以指定func是属于某个Type的，类似：
-{% highlight go %}
+{% highlight go %}        
 func (k Key) String() string {
 	return strconv.FormatUint(uint64(k), 10)
 }
-{% endhighlight %}
+{% endhighlight %}        
+就是定义了一个Key对象的String方法，该方法没有参数，然后返回值是一个string
