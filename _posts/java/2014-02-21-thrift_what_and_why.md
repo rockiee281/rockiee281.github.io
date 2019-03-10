@@ -4,15 +4,17 @@ category : java
 tags : [java, thrift]
 ---
 这两天有点时间，琢磨下一直一知半解的thrift。thrift的[官网](http://thrift.apache.org/)中对它的介绍是：
+
 ```
 The Apache Thrift software framework, for scalable cross-language services development, combines a software stack with a code generation engine to build services that work efficiently and seamlessly between C++, Java, Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa, JavaScript, Node.js, Smalltalk, OCaml and Delphi and other languages
 ```
 
-首先就是安装，按照官网的指导，下载了thrift的安装包，编译安装。thrift有官方的一个[白皮书](http://thrift.apache.org/static/files/thrift-20070401.pdf),看这格式很像论文的样子……安装就遇到问题了：    
+首先就是安装，按照官网的指导，下载了thrift的安装包，编译安装。thrift有官方的一个[白皮书](http://thrift.apache.org/static/files/thrift-20070401.pdf),看这格式很像论文的样子……安装就遇到问题了：
 1. `libs/thrifttest_constants.o no such file or directory` 首先是用官网的tar包来make，遇到这个错误可耻的失败了。去了github clone一个回来，就ok了。
 2. `'SSLProtocol' is not a class or namespace` ,google 半天也不知道所以然。git checkout到0.9.1版，搞定
 
 安装完成之后，按照官方的提供的例子创建了一个thrift配置文件：
+
 ```
       struct UserProfile {
         1: i32 uid,
@@ -24,7 +26,9 @@ The Apache Thrift software framework, for scalable cross-language services devel
         UserProfile retrieve(1: i32 uid)
       }
 ```
+
 其参数是个结构体，然后service中定义了2个接口，一个用来储存数据，一个用来根据UID查询。调用`thrift --gen py my.thrift`，就可以生成python的代码，用于编写python的客户端和服务器端。生成文件的结构如下：
+
 ```
 gen-py/
 ├── __init__.py
@@ -36,7 +40,8 @@ gen-py/
     └── UserStorage-remote
 ```
 其中ttypes.py中包含了自动生成的类型代码，UserStorage中封装了相关的class和基本架构。下面附上python服务器端的代码：
-```
+
+```python
 #!/usr/bin/env python
 import sys
 sys.path.append('./gen-py')
@@ -74,13 +79,16 @@ print 'starting python server ....'
 server.serve()
 print 'done!'
 ```
+
 把它放到脚本中启动，即可作为服务端提供服务啦。UserStorage-remote可以作为一个简单的客户端脚本，作为测试用。比如：
+
 ```
 [rockiee@testserver thrift]$ ./UserStorage-remote retrieve 123
 UserProfile(uid=123, blurb='xxxx', name='lx281')
 ```
 
-周末正好去听了百度技术沙龙的一个分享，是关于百度自己搭建的一个sofa系统，跟thrift还真是挺类似的。他们也是做了一个异构系统的服务发布平台，通过类似thrift一样的系统，去远程调用服务。不过还是不够我心目中的完美，我理想中的服务化平台，应该有这样的功能：    
+周末正好去听了百度技术沙龙的一个分享，是关于百度自己搭建的一个sofa系统，跟thrift还真是挺类似的。他们也是做了一个异构系统的服务发布平台，通过类似thrift一样的系统，去远程调用服务。不过还是不够我心目中的完美，我理想中的服务化平台，应该有这样的功能：
+
 1. 客户端不用关心提供服务方的具体信息，比如服务器ip、端口这些，只需要向配置管理中心提出申请，由管理中心自动指定。这样客户端也就不用自己去指定需要多少个服务端来提供服务，都可以由配置管理中心来动态的配置，这样可以根据负载灵活的增删提供服务的节点。
 2. Qos监控。配置管理中心的存在，一方面是配置管理、服务分配；另一方面就可以对服务质量进行监控，对于那些响应时间超长或者占用资源过多的服务端、客户端发出告警。
 3. 服务注册自动化。服务端启动之后自动的向配置管理中心注册自己的信息，服务端要实现基本的监控接口并提供给配置管理中心，由配置管理中心负责定时监控。
